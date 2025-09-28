@@ -144,14 +144,20 @@ jobs:
           ls -lh ./dist/panopticon
           file ./dist/panopticon
 
+      - name: Generate version
+        id: version
+        run: |
+          # Generate version based on date and short commit hash
+          DATE=$(date +%Y.%m.%d)
+          SHORT_SHA=${GITHUB_SHA::8}
+          VERSION="${DATE}-${SHORT_SHA}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Generated version: ${VERSION}"
+
       - name: Create artifact name
         id: artifact
         run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          else
-            VERSION=${GITHUB_SHA::8}
-          fi
+          VERSION=${{ steps.version.outputs.version }}
           echo "name=panopticon-jetson-orin-${VERSION}" >> $GITHUB_OUTPUT
 
       - name: Upload artifact
@@ -161,15 +167,21 @@ jobs:
           path: dist/panopticon
           retention-days: 30
 
-      - name: Create Release (on tags)
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create Release
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: build-${{ steps.version.outputs.version }}
+          name: Build ${{ steps.version.outputs.version }}
           files: dist/panopticon
           generate_release_notes: true
-          name: Panopticon for NVIDIA Jetson Orin AGX - ${{ github.ref_name }}
+          prerelease: true
           body: |
-            ## NVIDIA Jetson Orin AGX Release
+            ## Automated Build for NVIDIA Jetson Orin AGX
+
+            **Version**: ${{ steps.version.outputs.version }}
+            **Commit**: ${{ github.sha }}
+            **Branch**: ${{ github.ref_name }}
 
             This binary is specifically built and optimized for:
             - **Platform**: NVIDIA Jetson Orin AGX 32GB
