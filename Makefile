@@ -15,8 +15,9 @@ PYTHON_VERSION := $(shell pyenv install --list 2>/dev/null | grep -E "^\s*3\.[0-
 PYENV_EXISTS := $(shell command -v pyenv 2> /dev/null)
 
 # Compiler and optimization flags
-CC := clang
-CXX := clang++
+# Use clang-21 if available, otherwise fall back to default clang
+CC := $(shell command -v clang-21 2> /dev/null || echo clang)
+CXX := $(shell command -v clang++-21 2> /dev/null || echo clang++)
 
 # ARM64 optimization flags for NVIDIA Jetson Orin AGX (Cortex-A78AE)
 # Always optimize for ARM64 - this is a Jetson-specific build
@@ -213,6 +214,7 @@ info:
 	fi
 	@echo "Architecture: $(shell uname -m)"
 	@echo "Compiler: $(CC)"
+	@echo "Compiler Version: $(shell $(CC) --version | head -1)"
 	@echo "CPU Flags: $(CPU_FLAGS)"
 	@echo "Optimization Flags: $(OPT_FLAGS)"
 	@echo "========================="
@@ -256,11 +258,11 @@ help:
 	@echo ""
 	@echo "Requirements:"
 	@echo "  - ARM64 architecture (aarch64) or ARM64 cross-compilation"
-	@echo "  - clang compiler"
+	@echo "  - Clang 21 compiler (auto-installed in CI, optional locally)"
 	@echo "  - pyenv (will be installed if missing)"
 	@echo "  - Python 3.x (latest stable version)"
 	@echo ""
 	@echo "Optimizations:"
-	@echo "  - Compiler: Clang with thin LTO"
+	@echo "  - Compiler: Clang 21 with thin LTO (falls back to system clang)"
 	@echo "  - Flags: -O3 -march=armv8.2-a+crypto+fp16+rcpc+dotprod"
 	@echo "  - Nuitka: Standalone single-file binary"

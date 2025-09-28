@@ -76,12 +76,20 @@ jobs:
             echo "bindings_updated=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Install latest LLVM/Clang
+        run: |
+          # Install latest LLVM/Clang using the official script
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 21
+
+          # Verify installation
+          clang-21 --version
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            clang \
-            lld \
             ccache \
             patchelf \
             build-essential \
@@ -104,8 +112,8 @@ jobs:
 
       - name: Build with Nuitka for Jetson
         env:
-          CC: clang
-          CXX: clang++
+          CC: clang-21
+          CXX: clang++-21
           # Optimize for Cortex-A78AE found in Jetson Orin
           CFLAGS: -O3 -march=armv8.2-a+crypto+fp16+rcpc+dotprod -flto=thin -ffast-math
           CXXFLAGS: -O3 -march=armv8.2-a+crypto+fp16+rcpc+dotprod -flto=thin -ffast-math

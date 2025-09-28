@@ -22,7 +22,7 @@ Panopticon connects to multiple data sources:
 
 ### Build Requirements
 - Python 3.x (latest stable version, managed via pyenv)
-- Clang compiler (required for optimal ARM64 performance)
+- Clang 21 compiler (latest stable for optimal ARM64 performance, falls back to system clang)
 - Nuitka 2.4.11+ (for binary compilation)
 - pyenv (will be installed automatically if missing)
 
@@ -135,7 +135,7 @@ GitHub Actions automatically builds Jetson ARM64 binaries on:
 The build system produces highly optimized binaries for NVIDIA Jetson Orin AGX 32GB:
 
 ### Compiler Optimizations
-- **Compiler**: Clang with thin LTO (Link Time Optimization)
+- **Compiler**: Clang 21 with thin LTO (Link Time Optimization)
 - **Architecture**: ARM64 Cortex-A78AE specific optimizations
   - Native: `-mcpu=native` (when building on target)
   - Cross-compile: `-march=armv8.2-a+crypto+fp16+rcpc+dotprod`
