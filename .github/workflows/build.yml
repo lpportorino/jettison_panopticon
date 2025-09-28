@@ -64,10 +64,7 @@ jobs:
 
             # Commit the update with [skip ci] to prevent recursive builds
             git add c_data_python_bindings
-            git commit -m "chore: Update Python bindings submodule [skip ci]
-
-Auto-updated by CI build process to ensure latest bindings are used.
-This commit was automatically generated."
+            git commit -m "chore: Update Python bindings submodule [skip ci]"$'\n\n'"Auto-updated by CI build process to ensure latest bindings are used."$'\n'"This commit was automatically generated."
 
             # Push the update
             git push origin HEAD:${GITHUB_REF#refs/heads/}
