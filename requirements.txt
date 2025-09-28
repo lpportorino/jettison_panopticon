@@ -1,0 +1,14 @@
+typing-extensions>=4.0.0
+pytest>=6.0.0
+black>=22.0.0
+isort>=5.0.0
+flake8>=3.9.0
+textual>=0.41.0
+rich>=13.6.0
+setuptools>=65.0.0
+websockets>=13.1
+chardet>=3.0.4
+Nuitka>=2.4.11
+redis>=5.2.0
+asyncpg>=0.29.0
+toml>=0.10.2

@@ -1,0 +1,3 @@
+[submodule "c_data_python_bindings"]
+	path = c_data_python_bindings
+	url = ../jettison_c_data_python_bindings
