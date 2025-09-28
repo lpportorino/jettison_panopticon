@@ -239,7 +239,7 @@ help:
 	@echo "Panopticon - NVIDIA Jetson Orin AGX Build System"
 	@echo "================================================="
 	@echo ""
-	@echo "Target Platform: NVIDIA Jetson Orin AGX 32GB (ARM64 only)"
+	@echo "Target Platform: NVIDIA Jetson Orin AGX 32GB"
 	@echo "CPU: Cortex-A78AE with NEON/Crypto extensions"
 	@echo ""
 	@echo "Targets:"
