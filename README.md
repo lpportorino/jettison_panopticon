@@ -223,7 +223,19 @@ sudo apt-get install -y build-essential libssl-dev zlib1g-dev \
 
 **Nuitka compilation errors**: Ensure clang is installed:
 ```bash
+# For default clang from Ubuntu repos:
 sudo apt-get install clang lld
+
+# For latest Clang 21 (recommended):
+wget https://apt.llvm.org/llvm.sh
+chmod +x llvm.sh
+sudo ./llvm.sh 21
+
+# Set Clang 21 as default:
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-21 100
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-21 100
+sudo update-alternatives --set clang /usr/bin/clang-21
+sudo update-alternatives --set clang++ /usr/bin/clang++-21
 ```
 
 ### Runtime Issues
