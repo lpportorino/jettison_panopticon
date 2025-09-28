@@ -14,6 +14,9 @@ jobs:
     name: Build for NVIDIA Jetson Orin AGX (ARM64)
     runs-on: ubuntu-22.04-arm
 
+    # Skip workflow if commit message contains [skip ci]
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+
     strategy:
       matrix:
         python-version: ['3.12']
@@ -34,36 +37,47 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Configure git for automated commits
+      - name: Update Python bindings if needed
+        id: update-bindings
         run: |
+          echo "=== Checking Python Bindings ===="
+
+          # Configure git for automated commits
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@github.com"
 
-      - name: Check and update Python bindings
-        id: check-bindings
-        run: |
-          # Make script executable
-          chmod +x ./scripts/update_bindings.sh
+          # Store the current commit for comparison
+          cd c_data_python_bindings
+          CURRENT_COMMIT=$(git rev-parse HEAD)
+          cd ..
 
-          # Run the update check
-          ./scripts/update_bindings.sh || EXIT_CODE=$?
+          # Fetch and merge latest changes
+          git submodule update --remote --merge c_data_python_bindings
 
-          if [ "$EXIT_CODE" = "78" ]; then
-            echo "Bindings were updated and pushed. Workflow will restart automatically."
-            echo "restart_needed=true" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ "$EXIT_CODE" != "0" ]; then
-            echo "Failed to check bindings"
-            exit $EXIT_CODE
+          # Check if submodule was updated
+          cd c_data_python_bindings
+          NEW_COMMIT=$(git rev-parse HEAD)
+          cd ..
+
+          if [ "$CURRENT_COMMIT" != "$NEW_COMMIT" ]; then
+            echo "✅ Bindings were updated from $CURRENT_COMMIT to $NEW_COMMIT"
+
+            # Commit the update with [skip ci] to prevent recursive builds
+            git add c_data_python_bindings
+            git commit -m "chore: Update Python bindings submodule [skip ci]
+
+Auto-updated by CI build process to ensure latest bindings are used.
+This commit was automatically generated."
+
+            # Push the update
+            git push origin HEAD:${GITHUB_REF#refs/heads/}
+
+            echo "✅ Pushed binding updates with [skip ci] tag"
+            echo "bindings_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Bindings are already up-to-date"
+            echo "bindings_updated=false" >> $GITHUB_OUTPUT
           fi
-
-          echo "restart_needed=false" >> $GITHUB_OUTPUT
-
-      - name: Cancel build if restart needed
-        if: steps.check-bindings.outputs.restart_needed == 'true'
-        run: |
-          echo "Build cancelled - will restart with updated bindings"
-          exit 0
 
       - name: Install system dependencies
         run: |

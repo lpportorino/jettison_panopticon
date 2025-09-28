@@ -114,7 +114,7 @@ deps: venv
 	$(VENV_NAME)/bin/pip install -r requirements.txt
 	@echo "Dependencies installed"
 
-# Check for binding updates before build
+# Check for binding updates (local development only)
 .PHONY: check-bindings
 check-bindings:
 	@echo "Checking for Python bindings updates..."
@@ -142,8 +142,9 @@ build: check-bindings deps
 	@echo "Optimized for NVIDIA Jetson Orin AGX 32GB"
 
 # Build for GitHub Actions (ARM64 runners only)
+# Note: CI workflow handles binding updates automatically
 .PHONY: build-ci
-build-ci: check-bindings
+build-ci:
 	@echo "Building in CI environment for NVIDIA Jetson Orin AGX..."
 	@echo "Architecture: ARM64 (aarch64)"
 	@echo "Target: Cortex-A78AE"
