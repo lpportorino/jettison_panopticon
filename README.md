@@ -130,6 +130,40 @@ GitHub Actions automatically builds Jetson ARM64 binaries on:
 
 **Important**: The CI requires Ubuntu 22.04 ARM64 runners. x86_64 runners are not supported as this is a Jetson-specific build.
 
+### Testing the Binary
+
+Since the binary is optimized specifically for NVIDIA Jetson Orin AGX (Cortex-A78AE), testing options depend on your hardware:
+
+#### On NVIDIA Jetson Orin AGX (Target Hardware)
+```bash
+./dist/panopticon --version
+./dist/panopticon  # Full execution
+```
+
+#### On Other ARM64 Hardware
+The binary may not run due to CPU-specific optimizations. You can still verify the build:
+```bash
+file ./dist/panopticon  # Check it's ARM64
+readelf -h ./dist/panopticon  # View ELF headers
+objdump -d ./dist/panopticon | grep -E "crypto|fp16|dot" | head -5  # Check for ARM extensions
+```
+
+#### On x86_64 Systems
+Cross-architecture testing options:
+```bash
+# 1. Use QEMU for basic smoke test (slow, may not support all instructions)
+qemu-aarch64 ./dist/panopticon --version
+
+# 2. Docker with ARM64 emulation (if Docker Desktop configured for multi-arch)
+docker run --rm --platform linux/arm64/v8 -v $(pwd):/app ubuntu:22.04 /app/dist/panopticon --version
+
+# 3. Static analysis only (no execution)
+file ./dist/panopticon
+strings ./dist/panopticon | grep version
+```
+
+**Note**: The binary uses ARM-specific optimizations (crypto, fp16, rcpc, dotprod) that may cause it to fail on ARM64 hardware that lacks these extensions. For production use, always test on actual NVIDIA Jetson Orin AGX hardware.
+
 ## Optimization Details
 
 The build system produces highly optimized binaries for NVIDIA Jetson Orin AGX 32GB:

@@ -114,11 +114,34 @@ jobs:
           echo "Building for NVIDIA Jetson Orin AGX (Cortex-A78AE)"
           make build-ci
 
-      - name: Test built binary
+      - name: Analyze built binary
         run: |
-          ./dist/panopticon --version || true
+          echo "=== Binary Analysis ==="
+          echo "File information:"
           file ./dist/panopticon
-          ldd ./dist/panopticon || true
+
+          echo -e "\n=== Size ==="
+          ls -lh ./dist/panopticon
+
+          echo -e "\n=== Architecture Details ==="
+          readelf -h ./dist/panopticon | grep -E "Class|Machine|Version" || true
+
+          echo -e "\n=== Required Libraries ==="
+          ldd ./dist/panopticon 2>&1 || echo "Note: ldd may fail if binary is for different architecture"
+
+          echo -e "\n=== ARM Instructions Used ==="
+          # Check for ARM-specific instructions that indicate optimization level
+          objdump -d ./dist/panopticon | grep -E "crypto|fp16|dot" | head -5 || echo "No advanced ARM instructions found in sample"
+
+          echo -e "\n=== Attempting to run binary ==="
+          # Try to run it, but don't fail the build if it can't execute
+          if [ "$(uname -m)" = "aarch64" ]; then
+            echo "Running on ARM64 architecture - attempting execution"
+            timeout 2 ./dist/panopticon --version || echo "Binary execution failed (may need Jetson-specific libraries)"
+          else
+            echo "Not running on ARM64 (current: $(uname -m)) - skipping execution test"
+            echo "This binary is specifically built for NVIDIA Jetson Orin AGX (Cortex-A78AE)"
+          fi
 
       - name: Create artifact name
         id: artifact
