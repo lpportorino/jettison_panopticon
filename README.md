@@ -98,19 +98,27 @@ make run-dev
 
 The project uses a Makefile with Nuitka to create highly optimized ARM64 binaries specifically for NVIDIA Jetson Orin AGX.
 
+### Automatic Binding Updates
+
+The build system automatically checks for updates to the Python bindings submodule before each build:
+- **Local builds**: Prompts to update if newer bindings are available
+- **CI builds**: Automatically commits and pushes updates, then restarts the build
+- This ensures you always build with the latest C structure bindings
+
 ### Available Make Targets
 
 ```bash
 make           # Shows help (default)
 make help      # Display all available targets
 make setup     # Complete initial setup (pyenv, venv, deps, credentials)
-make build     # Build Jetson ARM64 production binary
+make build     # Build Jetson ARM64 production binary (checks for binding updates)
 make build-ci  # Build in CI environment (ARM64 runners only)
 make run-dev   # Run development version without compilation
 make test      # Test the built binary
 make clean     # Remove build artifacts
 make distclean # Remove everything including virtual environment
 make info      # Show build configuration and optimizations
+make check-bindings  # Manually check for binding updates
 ```
 
 ### CI/CD

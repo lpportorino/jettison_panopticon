@@ -114,9 +114,15 @@ deps: venv
 	$(VENV_NAME)/bin/pip install -r requirements.txt
 	@echo "Dependencies installed"
 
+# Check for binding updates before build
+.PHONY: check-bindings
+check-bindings:
+	@echo "Checking for Python bindings updates..."
+	@./scripts/update_bindings.sh || exit $$?
+
 # Build production binary
 .PHONY: build
-build: deps
+build: check-bindings deps
 	@echo "Building production binary for NVIDIA Jetson Orin AGX (ARM64)..."
 	@echo "Target: Cortex-A78AE"
 	@echo "CPU Flags: $(CPU_FLAGS)"
@@ -137,7 +143,7 @@ build: deps
 
 # Build for GitHub Actions (ARM64 runners only)
 .PHONY: build-ci
-build-ci:
+build-ci: check-bindings
 	@echo "Building in CI environment for NVIDIA Jetson Orin AGX..."
 	@echo "Architecture: ARM64 (aarch64)"
 	@echo "Target: Cortex-A78AE"
@@ -237,8 +243,9 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  setup           - Initial setup (pyenv, venv, dependencies)"
-	@echo "  build           - Build ARM64 production binary for Jetson"
+	@echo "  build           - Build ARM64 production binary (auto-updates bindings)"
 	@echo "  build-ci        - Build in CI environment (ARM64 runners)"
+	@echo "  check-bindings  - Check for Python binding updates"
 	@echo "  clean           - Remove build artifacts"
 	@echo "  distclean       - Remove everything including venv"
 	@echo "  run-dev         - Run development version (uncompiled)"
