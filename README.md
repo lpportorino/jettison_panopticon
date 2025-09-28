@@ -202,6 +202,65 @@ git submodule update --init --recursive
 git submodule update --remote --merge
 ```
 
+## Struct Verification System
+
+### Overview
+The project includes a verification system to ensure all C struct fields are properly displayed in the UI and documented.
+
+### State View Location
+The struct data is displayed in the Python application at:
+- **File**: `src/views/state_view.py`
+- **Method**: `handle_state_update()` (line 180)
+- This method receives state updates from the Lighthouse system and formats them for display in the tree view UI.
+
+### Verification Todo List
+- **File**: `struct_verification_todos.md`
+- Contains 96 structures with 192 todo items (2 per struct)
+- Each struct has two verification tasks:
+  1. Verify all fields are printed correctly in the state view
+  2. Add findings to the verification report
+
+### Todo Generation Script
+A Python script generates the verification todo list from the JSON struct definitions:
+```bash
+# Regenerate the todo list
+python3 scripts/generate_struct_todo.py
+```
+- **Script**: `scripts/generate_struct_todo.py`
+- **Input**: `c_data_python_bindings/jon_gui_state.json`
+- **Output**: `struct_verification_todos.md`
+
+### How to Use the Verification System
+
+1. **Review the Todo List**: Open `struct_verification_todos.md` to see all structs that need verification
+2. **Check State View**: For each struct in the todo list:
+   - Locate the corresponding code in `src/views/state_view.py:handle_state_update()`
+   - Verify all fields from the struct are being displayed
+   - Check formatting and transformations are correct
+3. **Document Findings**: For each verified struct:
+   - Mark the verification checkbox as complete
+   - Add notes about any missing or incorrectly formatted fields
+   - Document recommendations for fixes
+4. **Track Progress**: Use the todo checkboxes to track completion status
+
+### Example Verification Process
+```markdown
+# In struct_verification_todos.md:
+- [x] **Verify printing of `struct_jon_gui_data_compass`**
+  - Check that all 7 fields are printed in state view:
+    - `azimuth` (int32) ✓ - Converted with 0.05625 factor
+    - `elevation` (int32) ✓ - Converted with 0.05625 factor
+    - `bank` (int32) ✓ - Converted with 0.05625 factor
+    - `offset` (int32) ✓ - Converted with 0.05625 factor
+    - `units_idx` (union) ✓ - Formatted as enum
+    - `device_status` (union) ✓ - Formatted as enum
+    - `meteo` (struct) ✓ - Nested struct handled
+  - [x] **Add report entry for `struct_jon_gui_data_compass`**
+    - All fields correctly printed with appropriate conversions
+    - Enum formatting working properly
+    - Nested meteo struct handled correctly
+```
+
 ## Troubleshooting
 
 ### Build Issues
